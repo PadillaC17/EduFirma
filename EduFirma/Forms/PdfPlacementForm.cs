@@ -14,6 +14,8 @@ public sealed class PdfPlacementForm : Form
     private float widthPoints;
     private float heightPoints;
     private double fractionX = 0.1, fractionY = 0.1;
+    private bool fixedPosition;
+    private readonly Button confirm = new() { Text = "Firmar en esta posición", AutoSize = true, DialogResult = DialogResult.OK, Enabled = false };
     private const double StampWidth = 185;
     private const double StampHeight = 65;
 
@@ -27,7 +29,7 @@ public sealed class PdfPlacementForm : Form
         using (var doc = PdfReader.Open(pdf, PdfDocumentOpenMode.Import))
             count = doc.PageCount;
         if (count == 0) throw new InvalidOperationException("El PDF no tiene páginas.");
-        Text = "EduFirma — Elegir posición del sello";
+        Text = "EduFirma — Colocar firma y firmar PDF";
         Width = 890; Height = 980; MinimumSize = new Size(580, 500);
         StartPosition = FormStartPosition.CenterParent;
         var layout = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 3, ColumnCount = 1, Padding = new Padding(10) };
@@ -44,14 +46,14 @@ public sealed class PdfPlacementForm : Form
         layout.Controls.Add(header, 0, 0);
         layout.Controls.Add(image, 0, 1);
         var footer = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft };
-        var accept = new Button { Text = "Aplicar posición", AutoSize = true, DialogResult = DialogResult.OK };
-        footer.Controls.Add(accept);
+        footer.Controls.Add(confirm);
         footer.Controls.Add(new Button { Text = "Cancelar", AutoSize = true, DialogResult = DialogResult.Cancel });
         layout.Controls.Add(footer, 0, 2);
         Controls.Add(layout);
-        AcceptButton = accept; CancelButton = footer.Controls.OfType<Button>().Last();
-        pageNumber.ValueChanged += (_, _) => RenderPage();
-        image.MouseClick += (_, e) => Place(e.Location);
+        AcceptButton = confirm; CancelButton = footer.Controls.OfType<Button>().Last();
+        pageNumber.ValueChanged += (_, _) => { fixedPosition = false; confirm.Enabled = false; RenderPage(); };
+        image.MouseMove += (_, e) => { if (!fixedPosition) Place(e.Location, false); };
+        image.MouseClick += (_, e) => { if (e.Button == MouseButtons.Left) Place(e.Location, true); };
         image.Paint += (_, e) => DrawStamp(e.Graphics);
         image.Resize += (_, _) => image.Invalidate();
         Shown += (_, _) => RenderPage();
@@ -66,13 +68,14 @@ public sealed class PdfPlacementForm : Form
         return new RectangleF((image.ClientSize.Width - w) / 2f, (image.ClientSize.Height - h) / 2f, w, h);
     }
 
-    private void Place(Point cursor)
+    private void Place(Point cursor, bool commit)
     {
         RectangleF rect = DisplayRect();
         if (rect.IsEmpty || !rect.Contains(cursor)) return;
         fractionX = Math.Clamp((cursor.X - rect.X) / rect.Width, 0, 1);
         fractionY = Math.Clamp((cursor.Y - rect.Y) / rect.Height, 0, 1);
-        info.Text = $"Sello: página {SelectedPage}, X {SelectedX:F0} pt, Y {SelectedY:F0} pt";
+        if (commit) { fixedPosition = true; confirm.Enabled = true; }
+        info.Text = fixedPosition ? "Posición fijada. Pulsa Firmar o haz otro clic para cambiar." : "Mueve el cursor y haz clic para fijar la firma.";
         image.Invalidate();
     }
 
@@ -84,7 +87,7 @@ public sealed class PdfPlacementForm : Form
         float y = rect.Y + (float)((heightPoints - SelectedY - StampHeight) / heightPoints) * rect.Height;
         float w = (float)(StampWidth / widthPoints) * rect.Width;
         float h = (float)(StampHeight / heightPoints) * rect.Height;
-        using var pen = new Pen(Color.FromArgb(130, 75, 75, 190), 2) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dash };
+        using var pen = new Pen(fixedPosition ? Color.ForestGreen : Color.FromArgb(130, 75, 75, 190), 2) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dash };
         using var brush = new SolidBrush(Color.FromArgb(55, 80, 80, 190));
         graphics.FillRectangle(brush, x, y, w, h);
         graphics.DrawRectangle(pen, x, y, w, h);
@@ -109,7 +112,7 @@ public sealed class PdfPlacementForm : Form
             image.Image = new Bitmap(bitmap);
             previous?.Dispose();
             image.Invalidate();
-            info.Text = $"Página {SelectedPage}/{count} — clic para colocar el sello";
+            info.Text = $"Página {SelectedPage}/{count} — mueve el mouse y haz clic para fijar el sello";
         }
         catch (Exception ex)
         {
