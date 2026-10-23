@@ -6,10 +6,13 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>EduFirma</AssemblyName>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
     <ApplicationIcon>Assets\EduFirma.ico</ApplicationIcon>
   </PropertyGroup>
   <Target Name="GenerateEduFirmaIcon" BeforeTargets="CoreCompile" Condition="!Exists('Assets\EduFirma.ico')">
     <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\..\tools\create-icon.ps1&quot;" />
   </Target>
+  <ItemGroup>
+    <PackageReference Include="PDFsharp" Version="6.2.4" />
+  </ItemGroup>
 </Project>
