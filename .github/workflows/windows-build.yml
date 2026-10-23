@@ -18,7 +18,11 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+      - name: Generar icono EduFirma
+        shell: pwsh
+        run: ./tools/create-icon.ps1
       - name: Publicar EXE autonomo
+        shell: pwsh
         run: dotnet publish EduFirma/EduFirma.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o dist
       - name: Subir ejecutable
         uses: actions/upload-artifact@v4
