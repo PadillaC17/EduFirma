@@ -8,7 +8,7 @@ namespace EduFirma.Services;
 public static class PdfSigningService
 {
     // No se guarda el P12 ni la contraseña. Sin sello de tiempo remoto.
-    public static string Sign(string pdf, string p12, string password, string reason, string location, int pageNumber)
+    public static string Sign(string pdf, string p12, string password, string reason, string location, int pageNumber, double x = 40, double y = 40)
     {
         if (!File.Exists(pdf) || !File.Exists(p12)) throw new FileNotFoundException("Falta el PDF o el certificado.");
         using var cert = new X509Certificate2(p12, password, X509KeyStorageFlags.EphemeralKeySet);
@@ -27,7 +27,7 @@ public static class PdfSigningService
             Reason = reason ?? "",
             Location = location ?? "",
             PageIndex = pageNumber - 1,
-            Rectangle = new XRect(40, 40, 180, 55)
+            Rectangle = new XRect(x, y, 185, 65)
         };
         DigitalSignatureHandler.ForDocument(document, new PdfSharpDefaultSigner(cert, PdfMessageDigestType.SHA256), options);
 
