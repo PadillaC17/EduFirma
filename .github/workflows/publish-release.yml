@@ -1,0 +1,36 @@
+name: Publicar EduFirma v0.2.0
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Obtener codigo
+        uses: actions/checkout@v4
+      - name: Instalar .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Compilar ejecutable autonomo para Windows x64
+        shell: pwsh
+        run: |
+          dotnet publish EduFirma/EduFirma.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o dist
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Crear checksum SHA256
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash "dist/EduFirma.exe" -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  EduFirma.exe" | Set-Content -Path "dist/EduFirma.exe.sha256" -Encoding ascii
+      - name: Publicar Release (solo si no existe)
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view v0.2.0 *> $null
+          if ($LASTEXITCODE -eq 0) { Write-Error "Ya existe v0.2.0. No se sobreescribe."; exit 1 }
+          gh release create v0.2.0 "dist/EduFirma.exe" "dist/EduFirma.exe.sha256" --title "EduFirma v0.2.0 (vista previa)" --notes "Version experimental para Windows x64. Interfaz con pestañas Firmar, Verificar y Validar certificado. Lectura local del P12 y listado de PDFs. IMPORTANTE: Aun NO firma PDF ni verifica firmas criptograficas. EXE sin firma Authenticode." --target "${{ github.sha }}" --latest
