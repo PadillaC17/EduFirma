@@ -18,7 +18,7 @@ internal static class Program
 
 public sealed class MainForm : Form
 {
-    private const string Version = "0.4.0";
+    private const string Version = "0.5.0";
     private const string Repo = "PadillaC17/EduFirma";
     private readonly ListBox files = new() { Dock = DockStyle.Fill, SelectionMode = SelectionMode.MultiExtended, AllowDrop = true };
     private readonly TextBox p12Path = new() { ReadOnly = true, Dock = DockStyle.Fill };
@@ -102,6 +102,7 @@ public sealed class MainForm : Form
         tools.Controls.Add(MakeButton("Agregar PDF", SelectPdfs));
         tools.Controls.Add(MakeButton("Quitar seleccionado", () => { foreach (var item in files.SelectedItems.Cast<object>().ToArray()) files.Items.Remove(item); }));
         tools.Controls.Add(MakeButton("Abrir PDF", OpenSelectedPdf));
+        tools.Controls.Add(MakeButton("Colocar firma con mouse", PlaceSignature));
         tools.Controls.Add(new Label { Text = "Arrastra PDF a la lista", AutoSize = true, ForeColor = Color.DimGray, Padding = new Padding(10, 8, 0, 0) });
         filePanel.Controls.Add(tools, 0, 0);
         filePanel.Controls.Add(files, 0, 1);
@@ -167,6 +168,24 @@ public sealed class MainForm : Form
         return b;
     }
 
+    private readonly Dictionary<string, (int page, double x, double y)> placements = new(StringComparer.OrdinalIgnoreCase);
+
+    private void PlaceSignature()
+    {
+        if (files.SelectedItem is not string pdf) { MessageBox.Show(this, "Selecciona un documento de la lista.", "EduFirma"); return; }
+        try
+        {
+            using var dialog = new EduFirma.Forms.PdfPlacementForm(pdf, (int)page.Value);
+            if (dialog.ShowDialog(this) == DialogResult.OK)
+            {
+                placements[pdf] = (dialog.SelectedPage, dialog.SelectedX, dialog.SelectedY);
+                page.Value = dialog.SelectedPage;
+                status.Text = $"Firma colocada en página {dialog.SelectedPage}, posición X:{dialog.SelectedX:F0} Y:{dialog.SelectedY:F0}.";
+            }
+        }
+        catch (Exception ex) { MessageBox.Show(this, "No se pudo abrir el visor: " + ex.Message, "EduFirma"); }
+    }
+
     private void SignDocuments()
     {
         if (files.Items.Count == 0 || !File.Exists(p12Path.Text) || string.IsNullOrEmpty(password.Text))
@@ -185,7 +204,8 @@ public sealed class MainForm : Form
             {
                 try
                 {
-                    var result = EduFirma.Services.PdfSigningService.Sign(pdf, p12Path.Text, password.Text, reason.Text, location.Text, (int)page.Value);
+                    var pos = placements.TryGetValue(pdf, out var selected) ? selected : ((int)page.Value, 40.0, 40.0);
+                    var result = EduFirma.Services.PdfSigningService.Sign(pdf, p12Path.Text, password.Text, reason.Text, location.Text, pos.Item1, pos.Item2, pos.Item3);
                     succeeded.Add(result);
                 }
                 catch (Exception ex) { failed.Add(Path.GetFileName(pdf) + ": " + ex.Message); }
