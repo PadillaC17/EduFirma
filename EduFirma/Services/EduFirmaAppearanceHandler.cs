@@ -43,14 +43,22 @@ public sealed class EduFirmaAppearanceHandler : IAnnotationAppearanceHandler
         gfx.DrawLine(new XPen(blue, 0.7), 81, 7, 81, Height - 7);
         gfx.DrawLine(new XPen(blue, 0.7), 224, 7, 224, Height - 7);
 
-        using (var qr = new QRCodeGenerator())
-        using (var data = qr.CreateQrCode(qrText, QRCodeGenerator.ECCLevel.M))
-        using (var pngQr = new PngByteQRCode(data))
+        // Renderizamos los módulos del QR como rectángulos vectoriales.
+        // Evita el error "Unsupported image format" de XImage.FromStream.
+        using (var generator = new QRCodeGenerator())
+        using (var data = generator.CreateQrCode(qrText, QRCodeGenerator.ECCLevel.M))
         {
-            byte[] bytes = pngQr.GetGraphic(5);
-            using var stream = new MemoryStream(bytes);
-            using var image = XImage.FromStream(stream);
-            gfx.DrawImage(image, 7, 7, 70, 70);
+            int modules = data.ModuleMatrix.Count;
+            const double qrSize = 70.0;
+            double unit = qrSize / modules;
+            for (int row = 0; row < modules; row++)
+            {
+                for (int col = 0; col < modules; col++)
+                {
+                    if (data.ModuleMatrix[row][col])
+                        gfx.DrawRectangle(XBrushes.Black, 7 + col * unit, 7 + row * unit, unit + 0.015, unit + 0.015);
+                }
+            }
         }
 
         string[] words = signer.Split(' ', StringSplitOptions.RemoveEmptyEntries);
