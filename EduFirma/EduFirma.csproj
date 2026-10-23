@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>EduFirma</AssemblyName>
-    <Version>0.5.2</Version>
+    <Version>0.6.0</Version>
     <ApplicationIcon>Assets\EduFirma.ico</ApplicationIcon>
   </PropertyGroup>
   <Target Name="GenerateEduFirmaIcon" BeforeTargets="CoreCompile" Condition="!Exists('Assets\EduFirma.ico')">
@@ -15,5 +15,6 @@
   <ItemGroup>
     <PackageReference Include="PDFsharp" Version="6.2.4" />
     <PackageReference Include="PDFtoImage" Version="5.4.0" />
+    <PackageReference Include="QRCoder" Version="1.8.0" />
   </ItemGroup>
 </Project>
