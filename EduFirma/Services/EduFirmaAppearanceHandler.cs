@@ -16,32 +16,31 @@ public sealed class EduFirmaAppearanceHandler : IAnnotationAppearanceHandler
     private readonly string signer;
     private readonly string qrText;
     private readonly string signedAt;
-    public const double Width = 310;
-    public const double Height = 85;
+    public const double Width = 248;
+    public const double Height = 68;
 
     public EduFirmaAppearanceHandler(X509Certificate2 certificate, DateTimeOffset time)
     {
         signer = certificate.GetNameInfo(X509NameType.SimpleName, false);
         if (string.IsNullOrWhiteSpace(signer)) signer = certificate.Subject;
         signedAt = time.ToString("dd/MM/yyyy HH:mm:ss zzz");
-        qrText = "FIRMA ELECTRONICA - DATOS INFORMATIVOS" + "\n"
+        qrText = "EduVirtual Firmas" + "\n"
             + "Firmante: " + signer + "\n"
-            + "Emisor: " + certificate.Issuer + "\n"
-            + "Serie del certificado: " + certificate.SerialNumber + "\n"
+            + "Serie: " + certificate.SerialNumber + "\n"
             + "Fecha local declarada: " + signedAt + "\n"
-            + "Aplicacion: EduFirmas" + "\n"
-            + "Para verificar autenticidad, examine la firma digital del PDF.";
+            + "Verificar firma digital en el PDF.";
     }
 
     public void DrawAppearance(XGraphics gfx, XRect rect)
     {
+        gfx.ScaleTransform(0.8, 0.8);
         var navy = XColor.FromArgb(15, 37, 83);
         var blue = XColor.FromArgb(20, 122, 219);
         var light = new XSolidBrush(XColor.FromArgb(245, 250, 255));
-        gfx.DrawRectangle(XBrushes.White, 0, 0, Width, Height);
-        gfx.DrawRectangle(new XPen(blue, 0.7), light, 0.5, 0.5, Width - 1, Height - 1);
-        gfx.DrawLine(new XPen(blue, 0.7), 81, 7, 81, Height - 7);
-        gfx.DrawLine(new XPen(blue, 0.7), 224, 7, 224, Height - 7);
+        gfx.DrawRectangle(XBrushes.White, 0, 0, 310, 85);
+        gfx.DrawRectangle(new XPen(blue, 0.7), light, 0.5, 0.5, 309, 84);
+        gfx.DrawLine(new XPen(blue, 0.7), 81, 7, 81, 78);
+        gfx.DrawLine(new XPen(blue, 0.7), 224, 7, 224, 78);
 
         // Renderizamos los módulos del QR como rectángulos vectoriales.
         // Evita el error "Unsupported image format" de XImage.FromStream.
@@ -88,7 +87,7 @@ public sealed class EduFirmaAppearanceHandler : IAnnotationAppearanceHandler
         gfx.DrawEllipse(emblem, 262, 10, 6, 6);
         var logoFont = new XFont("Arial", 12, XFontStyleEx.Bold);
         var logoSmall = new XFont("Arial", 5.6, XFontStyleEx.Regular);
-        gfx.DrawString("EduFirmas", logoFont, blueBrush, new XRect(228, 51, 79, 16), XStringFormats.TopCenter);
-        gfx.DrawString("FIRMA ELECTRÓNICA", logoSmall, blueBrush, new XRect(228, 69, 79, 10), XStringFormats.TopCenter);
+        gfx.DrawString("EduVirtual", logoFont, blueBrush, new XRect(228, 51, 79, 16), XStringFormats.TopCenter);
+        gfx.DrawString("FIRMAS · ELECTRÓNICA", logoSmall, blueBrush, new XRect(228, 69, 79, 10), XStringFormats.TopCenter);
     }
 }
