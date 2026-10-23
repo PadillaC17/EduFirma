@@ -102,7 +102,7 @@ public sealed class PdfPlacementForm : Form
             }
             using var fs = File.OpenRead(path);
             using var stream = new MemoryStream();
-            PDFtoImage.Conversion.SavePng(stream, fs, page: SelectedPage - 1);
+            PDFtoImage.Conversion.SavePng(imageStream: stream, pdfStream: fs, page: SelectedPage - 1);
             stream.Position = 0;
             using var bitmap = Image.FromStream(stream);
             var previous = image.Image;
