@@ -20,7 +20,7 @@ internal static class Program
 
 public sealed class MainForm : Form
 {
-    private const string Version = "0.5.2";
+    private const string Version = "0.6.1";
     private const string Repo = "PadillaC17/EduFirma";
     private readonly ListBox files = new() { Dock = DockStyle.Fill, SelectionMode = SelectionMode.MultiExtended, AllowDrop = true };
     private readonly TextBox p12Path = new() { ReadOnly = true, Dock = DockStyle.Fill };
@@ -33,7 +33,7 @@ public sealed class MainForm : Form
 
     public MainForm()
     {
-        Text = "EduFirma — v" + Version;
+        Text = "EduVirtual Firmas — v" + Version;
         Width = 940; Height = 680; MinimumSize = new Size(760, 520);
         StartPosition = FormStartPosition.CenterScreen;
         Font = new Font("Segoe UI", 10);
@@ -44,8 +44,8 @@ public sealed class MainForm : Form
         shell.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         shell.RowStyles.Add(new RowStyle(SizeType.Absolute, 45));
         var top = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.LeftToRight };
-        top.Controls.Add(new Label { Text = "EduFirma", Font = new Font("Segoe UI", 22, FontStyle.Bold), Width = 180, Height = 45 });
-        top.Controls.Add(new Label { Text = "Firma electrónica local  |  v" + Version, ForeColor = Color.DimGray, Width = 285, Height = 43, TextAlign = ContentAlignment.MiddleLeft });
+        top.Controls.Add(new Label { Text = "EduVirtual Firmas", Font = new Font("Segoe UI", 22, FontStyle.Bold), Width = 260, Height = 45 });
+        top.Controls.Add(new Label { Text = "Firma electrónica local  |  v" + Version, ForeColor = Color.DimGray, Width = 210, Height = 43, TextAlign = ContentAlignment.MiddleLeft });
         top.Controls.Add(updateButton);
         updateButton.Click += async (_, _) => await CheckUpdatesAsync();
         shell.Controls.Add(top, 0, 0);
