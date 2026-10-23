@@ -1,26 +1,25 @@
-# EduFirma v0.2.0
+# EduFirma v0.4.0 — experimental
 
-Aplicación Windows de código abierto en **C# / .NET 8 / Windows Forms**.
+Aplicación Windows Forms en C# / .NET 8 para firma local de archivos PDF.
 
-## Incluido en esta versión
-- Interfaz rediseñada en tres pestañas: **Firmar documentos**, **Verificar documento** y **Validar certificado**.
-- Selección múltiple de PDF y posibilidad de arrastrarlos a la lista.
-- Abrir los PDF en el lector predeterminado de Windows.
-- Cargar certificados locales PKCS#12 y consultar titular, emisor, fechas y disponibilidad de clave privada.
-- Campos para razón, lugar, página y tipo de sello como preparativos para la firma visible.
-- Botón **Buscar actualizaciones**: consulta GitHub Releases bajo demanda; en repositorios privados abre el navegador.
-- Licencia MIT. Los archivos P12, PDF y secretos están excluidos por .gitignore.
+## Funciones
+- Seleccionar varios PDF, arrastrar archivos y consultar el certificado PKCS#12.
+- **Firma CMS/SHA-256 experimental de PDF** mediante PDFsharp 6.2.4 (MIT).
+- Guarda copias con sufijo `_EduFirma.pdf`. Nunca sobreescribe los originales.
+- Botón para buscar nuevas versiones en GitHub Releases (sin actualización automática).
+- Verificación integral de firmas, sello visible editable y previsualización incrustada: **pendientes**.
 
-**IMPORTANTE:** Esta versión **NO firma PDF** ni valida criptográficamente firmas PDF. El botón Firmar permanece deshabilitado. La pestaña Verificar informa de esa limitación. No se hacen afirmaciones de seguridad basadas únicamente en el período de validez de un certificado.
+### Advertencias importantes
+**No utilices todavía EduFirma para documentos legales, universitarios o trámites oficiales.** El motor de firma debe superar compilación y pruebas independientes, incluyendo Adobe Acrobat, múltiples PDFs, y certificados de prueba. Esta versión puede reescribir el PDF y afectar firmas existentes; úsala únicamente en documentos sin firmas previas. No incluye comprobación de revocación OCSP/CRL, timestamp de autoridad TSA ni validación PAdES completa. La autenticidad y aceptación legal no están garantizadas.
 
-## Compilar el EXE
-En el repositorio, entra a **Actions → Compilar EduFirma Windows → Run workflow**; abre la ejecución que haya finalizado correctamente y descarga el artefacto **EduFirma-Windows-x64**. Se necesita Windows x64; el archivo se publica como ejecutable autónomo de .NET, sin instalar Python.
+Nunca subas tu archivo .p12, contraseña o PDFs personales al repositorio ni a GitHub Issues. Firma offline; el botón de actualizaciones sí consulta la API de GitHub.
 
-## Privacidad y actualizaciones
-El programa no sube documentos, certificados ni contraseñas. Solo el botón de búsqueda de actualizaciones inicia una conexión HTTPS a GitHub (o abre el navegador cuando el repositorio es privado). Esta versión no descarga ni instala automáticamente actualizaciones.
+## Compilar
+GitHub → Actions → **Compilar EduFirma Windows** → ejecución correcta → descargar artefacto `EduFirma-Windows-x64`.
+La compilación produce un ejecutable independiente `EduFirma.exe` para Windows x64. El proyecto utiliza PDFsharp 6.2.4 sujeto a licencia MIT.
 
-## Próximas fases
-1. Motor de firma PAdES compatible con certificados P12, con pruebas en lectores PDF.
-2. Vista previa del PDF y posicionamiento visual del sello.
-3. Verificación de firmas y cadena de confianza, con revocación en modo online opcional.
-4. Distribución de actualizaciones verificadas, sin acumular ZIP.
+## Plan
+1. Pruebas criptográficas de firmar y verificar con certificados de prueba.
+2. Vista previa PDF y sello visible interactivo.
+3. Verificador integrado completo (integridad, cadena de confianza y revocación opcional).
+4. Actualizador seguro con integridad/verificación de descarga y distribución sin ZIP.
