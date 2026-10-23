@@ -11,6 +11,8 @@ internal static class Program
     [STAThread]
     static void Main()
     {
+        // PDFsharp Core 6.2 needs an explicit resolver for Windows fonts.
+        PdfSharp.Fonts.GlobalFontSettings.UseWindowsFontsUnderWindows = true;
         ApplicationConfiguration.Initialize();
         Application.Run(new MainForm());
     }
