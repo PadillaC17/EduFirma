@@ -27,7 +27,8 @@ public static class PdfSigningService
             Reason = reason ?? "",
             Location = location ?? "",
             PageIndex = pageNumber - 1,
-            Rectangle = new XRect(x, y, 185, 65)
+            Rectangle = new XRect(x, y, EduFirmaAppearanceHandler.Width, EduFirmaAppearanceHandler.Height),
+            AppearanceHandler = new EduFirmaAppearanceHandler(cert, DateTimeOffset.Now)
         };
         DigitalSignatureHandler.ForDocument(document, new PdfSharpDefaultSigner(cert, PdfMessageDigestType.SHA256), options);
 
