@@ -1,0 +1,45 @@
+# Crea EduFirma.ico para Windows durante la compilacion.
+Add-Type -AssemblyName System.Drawing
+$dir = Join-Path $PSScriptRoot '..\EduFirma\Assets'
+New-Item -ItemType Directory -Force -Path $dir | Out-Null
+$size = 128
+$bitmap = [System.Drawing.Bitmap]::new($size,$size,[System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
+$g = [System.Drawing.Graphics]::FromImage($bitmap)
+$g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+$g.Clear([System.Drawing.Color]::Transparent)
+$blue = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(38,113,226))
+$violet = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(87,66,186))
+$white = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::White)
+$ink = [System.Drawing.Pen]::new([System.Drawing.Color]::FromArgb(40,52,145),7)
+$check = [System.Drawing.Pen]::new([System.Drawing.Color]::White,7)
+$g.FillEllipse($violet,3,3,122,122)
+$g.FillRectangle($white,34,20,64,87)
+$g.FillPolygon($blue,[System.Drawing.Point[]]@([System.Drawing.Point]::new(76,20),[System.Drawing.Point]::new(98,20),[System.Drawing.Point]::new(98,44)))
+$g.DrawLine($ink,44,52,86,52)
+$g.DrawLine($ink,44,65,78,65)
+$g.DrawBeziers($ink,[System.Drawing.Point[]]@([System.Drawing.Point]::new(45,85),[System.Drawing.Point]::new(54,70),[System.Drawing.Point]::new(63,101),[System.Drawing.Point]::new(76,85)))
+$g.FillEllipse($blue,8,75,50,45)
+$g.DrawLines($check,[System.Drawing.Point[]]@([System.Drawing.Point]::new(20,95),[System.Drawing.Point]::new(29,104),[System.Drawing.Point]::new(46,85)))
+$g.Dispose()
+$ms = [System.IO.MemoryStream]::new()
+$bitmap.Save($ms,[System.Drawing.Imaging.ImageFormat]::Png)
+$png = $ms.ToArray()
+$ms.Dispose()
+$bitmap.Dispose()
+$out = Join-Path $dir 'EduFirma.ico'
+$fs = [System.IO.File]::Create($out)
+$bw = [System.IO.BinaryWriter]::new($fs)
+$bw.Write([uint16]0)
+$bw.Write([uint16]1)
+$bw.Write([uint16]1)
+$bw.Write([byte]128)
+$bw.Write([byte]128)
+$bw.Write([byte]0)
+$bw.Write([byte]0)
+$bw.Write([uint16]1)
+$bw.Write([uint16]32)
+$bw.Write([uint32]$png.Length)
+$bw.Write([uint32]22)
+$bw.Write($png)
+$bw.Dispose()
+Write-Host "Icono creado: $out"
