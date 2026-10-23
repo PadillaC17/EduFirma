@@ -77,17 +77,35 @@ public sealed class EduFirmaAppearanceHandler : IAnnotationAppearanceHandler
         gfx.DrawString("Firmado electrónicamente", smallFont, blueBrush, new XRect(87, 50, 132, 12), XStringFormats.TopLeft);
         gfx.DrawString(signedAt, smallFont, blueBrush, new XRect(87, 65, 132, 12), XStringFormats.TopLeft);
 
-        // Monograma original vectorial de EduFirmas: pluma sobre libro abierto.
-        var emblem = new XSolidBrush(blue);
-        gfx.DrawLine(new XPen(navy, 3), 244, 40, 265, 48);
-        gfx.DrawLine(new XPen(blue, 3), 265, 48, 284, 40);
-        gfx.DrawLine(new XPen(blue, 2), 265, 47, 265, 18);
-        gfx.DrawLine(new XPen(navy, 3), 255, 37, 265, 13);
-        gfx.DrawLine(new XPen(navy, 3), 275, 37, 265, 13);
-        gfx.DrawEllipse(emblem, 262, 10, 6, 6);
-        var logoFont = new XFont("Arial", 12, XFontStyleEx.Bold);
-        var logoSmall = new XFont("Arial", 5.6, XFontStyleEx.Regular);
-        gfx.DrawString("EduVirtual", logoFont, blueBrush, new XRect(228, 51, 79, 16), XStringFormats.TopCenter);
-        gfx.DrawString("FIRMAS · ELECTRÓNICA", logoSmall, blueBrush, new XRect(228, 69, 79, 10), XStringFormats.TopCenter);
+        // Identidad visual policromática inspirada en el logotipo elegido:
+        // pluma académica + libro abierto + píxeles digitales.
+        var dark = new XSolidBrush(XColor.FromArgb(6, 35, 81));
+        var sky = new XSolidBrush(XColor.FromArgb(19, 145, 229));
+        var royal = new XSolidBrush(XColor.FromArgb(7, 84, 181));
+        var penDark = new XPen(XColor.FromArgb(6, 35, 81), 3.5);
+        var penSky = new XPen(XColor.FromArgb(19, 145, 229), 3);
+        // Pluma con hoja estilizada.
+        gfx.DrawLine(penDark, 263, 15, 263, 45);
+        gfx.DrawLine(new XPen(XColor.FromArgb(8, 75, 158), 5), 263, 18, 253, 36);
+        gfx.DrawLine(new XPen(XColor.FromArgb(9, 115, 205), 5), 263, 18, 273, 36);
+        gfx.DrawEllipse(sky, 261, 13, 4, 4);
+        // Páginas abiertas.
+        gfx.DrawLine(new XPen(XColor.FromArgb(5, 57, 130), 4), 234, 34, 252, 45);
+        gfx.DrawLine(new XPen(XColor.FromArgb(13, 98, 191), 3), 252, 45, 263, 49);
+        gfx.DrawLine(new XPen(XColor.FromArgb(15, 136, 215), 3), 263, 49, 277, 44);
+        gfx.DrawLine(new XPen(XColor.FromArgb(2, 73, 156), 4), 277, 44, 292, 34);
+        gfx.DrawLine(penSky, 238, 41, 263, 53);
+        gfx.DrawLine(penDark, 263, 53, 290, 41);
+        // Pixeles azules: transición educativa al mundo digital.
+        gfx.DrawRectangle(sky, 284, 17, 6, 6);
+        gfx.DrawRectangle(royal, 293, 25, 5, 5);
+        gfx.DrawRectangle(sky, 282, 29, 4, 4);
+        gfx.DrawRectangle(royal, 295, 14, 4, 4);
+        // Palabra principal y subtítulo en colores diferentes.
+        var logoFont = new XFont("Arial", 10, XFontStyleEx.Bold);
+        var logoSmall = new XFont("Arial", 7, XFontStyleEx.Bold);
+        gfx.DrawString("EduVirtual", logoFont, dark, new XRect(227, 55, 81, 13), XStringFormats.TopCenter);
+        gfx.DrawString("F I R M A S", logoSmall, sky, new XRect(228, 69, 79, 10), XStringFormats.TopCenter);
+
     }
 }
