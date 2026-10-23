@@ -16,8 +16,8 @@ public sealed class PdfPlacementForm : Form
     private double fractionX = 0.1, fractionY = 0.1;
     private bool fixedPosition;
     private readonly Button confirm = new() { Text = "Firmar en esta posición", AutoSize = true, DialogResult = DialogResult.OK, Enabled = false };
-    private const double StampWidth = 248;
-    private const double StampHeight = 68;
+    private const double StampWidth = 228;
+    private const double StampHeight = 59;
 
     public int SelectedPage => (int)pageNumber.Value;
     public double SelectedX => Math.Clamp(fractionX * widthPoints, 0, Math.Max(0, widthPoints - StampWidth));
