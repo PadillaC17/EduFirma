@@ -18,7 +18,7 @@ internal static class Program
 
 public sealed class MainForm : Form
 {
-    private const string Version = "0.5.0";
+    private const string Version = "0.5.1";
     private const string Repo = "PadillaC17/EduFirma";
     private readonly ListBox files = new() { Dock = DockStyle.Fill, SelectionMode = SelectionMode.MultiExtended, AllowDrop = true };
     private readonly TextBox p12Path = new() { ReadOnly = true, Dock = DockStyle.Fill };
@@ -26,11 +26,6 @@ public sealed class MainForm : Form
     private readonly TextBox certInfo = new() { Multiline = true, ReadOnly = true, Dock = DockStyle.Fill, ScrollBars = ScrollBars.Vertical };
     private readonly Label status = new() { Text = "Arrastra documentos PDF o pulsa Agregar documentos.", Dock = DockStyle.Fill };
     private readonly Button updateButton = new() { Text = "Buscar actualizaciones", AutoSize = true };
-    private readonly TextBox reason = new() { Dock = DockStyle.Fill };
-    private readonly TextBox location = new() { Dock = DockStyle.Fill };
-    private readonly CheckBox invisible = new() { Text = "Sello visible personalizable (pendiente)", AutoSize = true };
-    private readonly ComboBox stamp = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 140 };
-    private readonly NumericUpDown page = new() { Minimum = 1, Maximum = 99999, Width = 70 };
     private readonly TabControl tabs = new() { Dock = DockStyle.Fill };
     private readonly Color accent = Color.FromArgb(87, 84, 174);
 
@@ -71,12 +66,10 @@ public sealed class MainForm : Form
     private TabPage CreateSignTab()
     {
         var tab = new TabPage("Firmar documentos");
-        var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(12), RowCount = 6, ColumnCount = 1 };
+        var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(12), RowCount = 4, ColumnCount = 1 };
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 66));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 60));
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 55));
-        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 55));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 56));
 
         var p12Row = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3 };
@@ -108,27 +101,11 @@ public sealed class MainForm : Form
         filePanel.Controls.Add(files, 0, 1);
         layout.Controls.Add(filePanel, 0, 2);
 
-        var props = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true };
-        props.Controls.Add(new Label { Text = "Razón:", AutoSize = true, Padding = new Padding(0, 8, 0, 0) });
-        reason.Width = 210; props.Controls.Add(reason);
-        props.Controls.Add(new Label { Text = "Lugar:", AutoSize = true, Padding = new Padding(8, 8, 0, 0) });
-        location.Width = 200; props.Controls.Add(location);
-        layout.Controls.Add(props, 0, 3);
-
-        var positions = new FlowLayoutPanel { Dock = DockStyle.Fill };
-        positions.Controls.Add(new Label { Text = "Página:", AutoSize = true, Padding = new Padding(0, 8, 0, 0) });
-        positions.Controls.Add(page);
-        positions.Controls.Add(new Label { Text = "Sello:", AutoSize = true, Padding = new Padding(9, 8, 0, 0) });
-        stamp.Items.AddRange(new object[] { "Texto", "QR (futuro)", "Invisible" });
-        stamp.SelectedIndex = 0;
-        positions.Controls.Add(stamp);
-        positions.Controls.Add(invisible);
-        layout.Controls.Add(positions, 0, 4);
         var footer = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft };
         var signButton = MakeButton("Firmar PDF con P12", SignDocuments);
         signButton.BackColor = accent; signButton.ForeColor = Color.White;
         footer.Controls.Add(signButton);
-        layout.Controls.Add(footer, 0, 5);
+        layout.Controls.Add(footer, 0, 3);
         tab.Controls.Add(layout);
         return tab;
     }
@@ -175,11 +152,10 @@ public sealed class MainForm : Form
         if (files.SelectedItem is not string pdf) { MessageBox.Show(this, "Selecciona un documento de la lista.", "EduFirma"); return; }
         try
         {
-            using var dialog = new EduFirma.Forms.PdfPlacementForm(pdf, (int)page.Value);
+            using var dialog = new EduFirma.Forms.PdfPlacementForm(pdf, placements.TryGetValue(pdf, out var current) ? current.page : 1);
             if (dialog.ShowDialog(this) == DialogResult.OK)
             {
                 placements[pdf] = (dialog.SelectedPage, dialog.SelectedX, dialog.SelectedY);
-                page.Value = dialog.SelectedPage;
                 status.Text = $"Firma colocada en página {dialog.SelectedPage}, posición X:{dialog.SelectedX:F0} Y:{dialog.SelectedY:F0}.";
             }
         }
@@ -193,6 +169,11 @@ public sealed class MainForm : Form
             MessageBox.Show(this, "Agrega PDF, selecciona el P12 e introduce la contraseña.", "EduFirma");
             return;
         }
+        if (files.Items.Cast<string>().Any(pdf => !placements.ContainsKey(pdf)))
+        {
+            MessageBox.Show(this, "Primero elige la ubicación con 'Colocar firma con mouse' para cada PDF.", "EduFirma");
+            return;
+        }
         if (MessageBox.Show(this,
             "Versión experimental. Se generará una COPIA firmada de cada PDF con sufijo _EduFirma. No uses documentos ya firmados; PDFsharp puede reescribirlos y afectar firmas anteriores. Comprueba las firmas resultantes en un verificador independiente. ¿Continuar?",
             "Confirmar firma", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
@@ -204,8 +185,8 @@ public sealed class MainForm : Form
             {
                 try
                 {
-                    var pos = placements.TryGetValue(pdf, out var selected) ? selected : ((int)page.Value, 40.0, 40.0);
-                    var result = EduFirma.Services.PdfSigningService.Sign(pdf, p12Path.Text, password.Text, reason.Text, location.Text, pos.Item1, pos.Item2, pos.Item3);
+                    var pos = placements[pdf];
+                    var result = EduFirma.Services.PdfSigningService.Sign(pdf, p12Path.Text, password.Text, "", "", pos.Item1, pos.Item2, pos.Item3);
                     succeeded.Add(result);
                 }
                 catch (Exception ex) { failed.Add(Path.GetFileName(pdf) + ": " + ex.Message); }
