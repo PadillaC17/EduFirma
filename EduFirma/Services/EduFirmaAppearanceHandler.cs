@@ -27,11 +27,11 @@ public sealed class EduFirmaAppearanceHandler : IAnnotationAppearanceHandler
         string version = typeof(EduFirmaAppearanceHandler).Assembly.GetName().Version?.ToString(3) ?? "desconocida";
         string windows = System.Runtime.InteropServices.RuntimeInformation.OSDescription.Trim();
         qrText = "FIRMADO POR: " + signer
-            + "\\nRAZON: No especificada"
-            + "\\nLOCALIZACION: No especificada"
-            + "\\nFECHA: " + time.ToString("yyyy-MM-ddTHH:mm:sszzz")
-            + "\\nVERIFICAR CON: Aplicacion compatible con firmas PDF"
-            + "\\nFirmado digitalmente con EduVirtual Firmas v" + version
+            + "\nRAZON: No especificada"
+            + "\nLOCALIZACION: No especificada"
+            + "\nFECHA: " + time.ToString("yyyy-MM-ddTHH:mm:sszzz")
+            + "\nVERIFICAR CON: Aplicacion compatible con firmas PDF"
+            + "\nFirmado digitalmente con EduVirtual Firmas v" + version
             + " - " + windows;
     }
 
