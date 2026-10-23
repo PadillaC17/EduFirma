@@ -153,9 +153,6 @@ public sealed class MainForm : Form
             MessageBox.Show(this, "Agrega PDF, selecciona el P12 e introduce la contraseña.", "EduFirma");
             return;
         }
-        if (MessageBox.Show(this,
-            "Versión experimental. Se generará una COPIA firmada de cada PDF con sufijo _EduFirma. No uses documentos ya firmados; PDFsharp puede reescribirlos y afectar firmas anteriores. Comprueba las firmas resultantes en un verificador independiente. ¿Continuar?",
-            "Confirmar firma", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
         var succeeded = new List<string>();
         var failed = new List<string>();
         try
@@ -168,6 +165,11 @@ public sealed class MainForm : Form
                     if (dialog.ShowDialog(this) != DialogResult.OK)
                     {
                         status.Text = "Operación cancelada; no se firmaron los documentos restantes.";
+                        break;
+                    }
+                    if (MessageBox.Show(this, "Se creará una copia _EduFirma.pdf con firma experimental. No utilices un PDF que ya esté firmado; comprueba el resultado con un verificador independiente. ¿Firmar ahora?", "Confirmar firma", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                    {
+                        status.Text = "Firma cancelada.";
                         break;
                     }
                     var result = EduFirma.Services.PdfSigningService.Sign(pdf, p12Path.Text, password.Text, "", "", dialog.SelectedPage, dialog.SelectedX, dialog.SelectedY);
