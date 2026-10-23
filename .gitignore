@@ -1,0 +1,12 @@
+bin/
+obj/
+.vs/
+dist/
+*.p12
+*.pfx
+*.pem
+*.key
+*.snk
+*.pdf
+*.user
+*.suo
