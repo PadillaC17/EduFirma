@@ -18,7 +18,7 @@ internal static class Program
 
 public sealed class MainForm : Form
 {
-    private const string Version = "0.3.0";
+    private const string Version = "0.4.0";
     private const string Repo = "PadillaC17/EduFirma";
     private readonly ListBox files = new() { Dock = DockStyle.Fill, SelectionMode = SelectionMode.MultiExtended, AllowDrop = true };
     private readonly TextBox p12Path = new() { ReadOnly = true, Dock = DockStyle.Fill };
@@ -28,7 +28,7 @@ public sealed class MainForm : Form
     private readonly Button updateButton = new() { Text = "Buscar actualizaciones", AutoSize = true };
     private readonly TextBox reason = new() { Dock = DockStyle.Fill };
     private readonly TextBox location = new() { Dock = DockStyle.Fill };
-    private readonly CheckBox invisible = new() { Text = "Firma invisible (pendiente de implementar)", AutoSize = true };
+    private readonly CheckBox invisible = new() { Text = "Sello visible personalizable (pendiente)", AutoSize = true };
     private readonly ComboBox stamp = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 140 };
     private readonly NumericUpDown page = new() { Minimum = 1, Maximum = 99999, Width = 70 };
     private readonly TabControl tabs = new() { Dock = DockStyle.Fill };
@@ -124,8 +124,7 @@ public sealed class MainForm : Form
         positions.Controls.Add(invisible);
         layout.Controls.Add(positions, 0, 4);
         var footer = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft };
-        var signButton = MakeButton("Firmar (próximamente)", () => MessageBox.Show(this, "Aún no se implementa la firma criptográfica de PDF. No se modificó ningún documento.", "EduFirma"));
-        signButton.Enabled = false;
+        var signButton = MakeButton("Firmar PDF con P12", SignDocuments);
         signButton.BackColor = accent; signButton.ForeColor = Color.White;
         footer.Controls.Add(signButton);
         layout.Controls.Add(footer, 0, 5);
@@ -166,6 +165,39 @@ public sealed class MainForm : Form
         var b = new Button { Text = title, AutoSize = true, Padding = new Padding(5), MinimumSize = new Size(100, 35) };
         b.Click += (_, _) => action();
         return b;
+    }
+
+    private void SignDocuments()
+    {
+        if (files.Items.Count == 0 || !File.Exists(p12Path.Text) || string.IsNullOrEmpty(password.Text))
+        {
+            MessageBox.Show(this, "Agrega PDF, selecciona el P12 e introduce la contraseña.", "EduFirma");
+            return;
+        }
+        if (MessageBox.Show(this,
+            "Versión experimental. Se generará una COPIA firmada de cada PDF con sufijo _EduFirma. No uses documentos ya firmados; PDFsharp puede reescribirlos y afectar firmas anteriores. Comprueba las firmas resultantes en un verificador independiente. ¿Continuar?",
+            "Confirmar firma", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+        var succeeded = new List<string>();
+        var failed = new List<string>();
+        try
+        {
+            foreach (string pdf in files.Items)
+            {
+                try
+                {
+                    var result = EduFirma.Services.PdfSigningService.Sign(pdf, p12Path.Text, password.Text, reason.Text, location.Text, (int)page.Value);
+                    succeeded.Add(result);
+                }
+                catch (Exception ex) { failed.Add(Path.GetFileName(pdf) + ": " + ex.Message); }
+            }
+        }
+        finally { password.Clear(); }
+        var report = "PDF generados: " + succeeded.Count + Environment.NewLine +
+            string.Join(Environment.NewLine, succeeded.Select(Path.GetFileName));
+        if (failed.Count > 0) report += Environment.NewLine + Environment.NewLine + "Fallos:" + Environment.NewLine + string.Join(Environment.NewLine, failed);
+        MessageBox.Show(this, report, "EduFirma — resultado", MessageBoxButtons.OK,
+            failed.Count == 0 ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
+        status.Text = $"Firmas procesadas: {succeeded.Count} correctas, {failed.Count} fallidas (verifica los PDF).";
     }
 
     private void SelectCert()
