@@ -24,11 +24,15 @@ public sealed class EduFirmaAppearanceHandler : IAnnotationAppearanceHandler
         signer = certificate.GetNameInfo(X509NameType.SimpleName, false);
         if (string.IsNullOrWhiteSpace(signer)) signer = certificate.Subject;
         signedAt = time.ToString("dd/MM/yyyy HH:mm:ss zzz");
-        qrText = "EduVirtual Firmas" + "\n"
-            + "Firmante: " + signer + "\n"
-            + "Serie: " + certificate.SerialNumber + "\n"
-            + "Fecha local declarada: " + signedAt + "\n"
-            + "Verificar firma digital en el PDF.";
+        string version = typeof(EduFirmaAppearanceHandler).Assembly.GetName().Version?.ToString(3) ?? "desconocida";
+        string windows = System.Runtime.InteropServices.RuntimeInformation.OSDescription.Trim();
+        qrText = "FIRMADO POR: " + signer
+            + "\\nRAZON: No especificada"
+            + "\\nLOCALIZACION: No especificada"
+            + "\\nFECHA: " + time.ToString("yyyy-MM-ddTHH:mm:sszzz")
+            + "\\nVERIFICAR CON: Aplicacion compatible con firmas PDF"
+            + "\\nFirmado digitalmente con EduVirtual Firmas v" + version
+            + " - " + windows;
     }
 
     public void DrawAppearance(XGraphics gfx, XRect rect)
