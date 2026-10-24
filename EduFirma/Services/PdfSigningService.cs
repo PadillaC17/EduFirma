@@ -1,4 +1,5 @@
 using System.Security.Cryptography.X509Certificates;
+using System.Text.RegularExpressions;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Signatures;
@@ -15,6 +16,14 @@ public static class PdfSigningService
         if (!cert.HasPrivateKey) throw new InvalidOperationException("El certificado no contiene una clave privada.");
         if (DateTime.Now < cert.NotBefore || DateTime.Now > cert.NotAfter)
             throw new InvalidOperationException("El certificado está fuera de su período de validez.");
+
+        // PDFsharp reescribe el PDF. Bloquear documentos que parecen ya firmados.
+        // Detección conservadora, no sustituye un analizador formal de firmas PDF.
+        byte[] bytes = File.ReadAllBytes(pdf);
+        string pdfSource = System.Text.Encoding.Latin1.GetString(bytes);
+        if (Regex.IsMatch(pdfSource, @"/ByteRange\b|/FT\s*/Sig\b|/Type\s*/Sig\b", RegexOptions.CultureInvariant))
+            throw new InvalidOperationException(
+                "Se detectó una firma previa en el PDF. Esta versión no admite una segunda firma sin comprometer la anterior. Usa FirmaEC para agregar firmas a documentos ya firmados.");
 
         // PDFsharp puede reescribir el PDF completo al guardarlo. Evitar firmas previas.
         using var document = PdfReader.Open(pdf, PdfDocumentOpenMode.Modify);
