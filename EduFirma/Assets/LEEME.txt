@@ -1,0 +1,9 @@
+CARPETA DE RECURSOS DE EDUVIRTUAL FIRMAS
+
+Sube en esta misma carpeta el archivo MarcaEduVirtual.jpg (exactamente ese nombre, respetando mayusculas).
+Ruta requerida: EduFirma/Assets/MarcaEduVirtual.jpg
+El archivo debe incluirse en el repositorio ANTES de ejecutar GitHub Actions.
+La aplicacion incrusta esta imagen en EduFirma.exe durante la compilacion.
+No basta con colocar el JPG al lado del .exe despues de compilar.
+
+No subir archivos .p12, contraseñas ni PDFs personales.
