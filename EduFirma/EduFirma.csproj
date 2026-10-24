@@ -20,7 +20,7 @@
   <ItemGroup Condition="Exists('Assets/MarcaEduVirtual.png')">
     <EmbeddedResource Include="Assets/MarcaEduVirtual.png" LogicalName="EduFirma.Assets.MarcaEduVirtual.png" />
   </ItemGroup>
-  <ItemGroup Condition="Exists('Assets/MarcaEduVirtual.jpg')">
+  <ItemGroup  >
     <EmbeddedResource Include="Assets/MarcaEduVirtual.jpg" LogicalName="EduFirma.Assets.MarcaEduVirtual.jpg" />
   </ItemGroup>
 </Project>
