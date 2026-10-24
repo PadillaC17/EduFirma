@@ -13,7 +13,7 @@ public sealed class EduFirmaAppearanceHandler : IAnnotationAppearanceHandler
     private readonly string signer;
     private readonly string signedAt;
     private readonly string qrText;
-    private static readonly string LogoResource = "EduFirma.Assets.MarcaEduVirtual.png";
+    private static readonly string[] LogoResources = { "EduFirma.Assets.MarcaEduVirtual.png", "EduFirma.Assets.MarcaEduVirtual.jpg" };
 
     public EduFirmaAppearanceHandler(X509Certificate2 certificate, DateTimeOffset time)
     {
@@ -71,7 +71,7 @@ public sealed class EduFirmaAppearanceHandler : IAnnotationAppearanceHandler
         gfx.DrawLine(new XPen(navy, 0.7), 153, 6, 153, 53);
         // Incorporar exactamente la imagen del usuario como recurso del ensamblado.
         var names = new[] { "MarcaEduVirtual.png", "LogoEduVirtual.png", "MarcaEduVirtual.jpg" };
-        using var embedded = typeof(EduFirmaAppearanceHandler).Assembly.GetManifestResourceStream(LogoResource);
+        using var embedded = LogoResources.Select(n => typeof(EduFirmaAppearanceHandler).Assembly.GetManifestResourceStream(n)).FirstOrDefault(s => s != null);
         string? external = names.Select(n => Path.Combine(AppContext.BaseDirectory, "Assets", n)).FirstOrDefault(File.Exists);
         if (embedded == null && external == null)
             throw new InvalidOperationException("Falta el logo. Coloca MarcaEduVirtual.png en la carpeta Assets que está junto a EduFirma.exe y vuelve a abrir la aplicación.");
