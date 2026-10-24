@@ -8,8 +8,8 @@ namespace EduFirma.Services;
 public sealed class EduFirmaAppearanceHandler : IAnnotationAppearanceHandler
 {
     // Disposición compacta: nombre | QR | marca; sin rectángulo ni fondo.
-    public const double Width = 228;
-    public const double Height = 59;
+    public const double Width = 205;
+    public const double Height = 56;
     private readonly string signer;
     private readonly string signedAt;
     private readonly string qrText;
@@ -32,6 +32,8 @@ public sealed class EduFirmaAppearanceHandler : IAnnotationAppearanceHandler
 
     public void DrawAppearance(XGraphics gfx, XRect rect)
     {
+        // Escala el diseño anterior sin alterar su composición.
+        gfx.ScaleTransform(205.0 / 228.0, 56.0 / 59.0);
         var navy = XColor.FromArgb(7, 32, 79);
         var cyan = XColor.FromArgb(18, 164, 234);
         var textBrush = new XSolidBrush(navy);
@@ -70,12 +72,10 @@ public sealed class EduFirmaAppearanceHandler : IAnnotationAppearanceHandler
 
         gfx.DrawLine(new XPen(navy, 0.7), 153, 6, 153, 53);
         // Incorporar exactamente la imagen del usuario como recurso del ensamblado.
-        var names = new[] { "MarcaEduVirtual.png", "LogoEduVirtual.png", "MarcaEduVirtual.jpg" };
-        using var embedded = LogoResources.Select(n => typeof(EduFirmaAppearanceHandler).Assembly.GetManifestResourceStream(n)).FirstOrDefault(s => s != null);
-        string? external = names.Select(n => Path.Combine(AppContext.BaseDirectory, "Assets", n)).FirstOrDefault(File.Exists);
-        if (embedded == null && external == null)
-            throw new InvalidOperationException("Falta el logo. Coloca MarcaEduVirtual.png en la carpeta Assets que está junto a EduFirma.exe y vuelve a abrir la aplicación.");
-        using var source = embedded ?? File.OpenRead(external!);
+        using var source = LogoResources
+            .Select(n => typeof(EduFirmaAppearanceHandler).Assembly.GetManifestResourceStream(n))
+            .FirstOrDefault(stream => stream is not null)
+            ?? throw new InvalidOperationException("El logotipo oficial no está incrustado en EduVirtual Firmas.");
         // Conversión a JPEG en memoria: PDFsharp reconoce esta imagen sin depender del formato PNG.
         using var bitmap = new System.Drawing.Bitmap(source);
         using var converted = new System.Drawing.Bitmap(bitmap.Width, bitmap.Height);
