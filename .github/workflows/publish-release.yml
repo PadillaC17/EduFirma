@@ -1,4 +1,4 @@
-name: Publicar EduFirma v0.5.0
+name: Publicar EduVirtual Firmas v0.6.3
 
 on:
   workflow_dispatch:
@@ -21,6 +21,15 @@ jobs:
         run: |
           dotnet publish EduFirma/EduFirma.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o dist
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Empaquetar ejecutable y Assets
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist/Assets | Out-Null
+          $names = @("MarcaEduVirtual.png", "LogoEduVirtual.png", "MarcaEduVirtual.jpg")
+          $found = $names | Where-Object { Test-Path ("EduFirma/Assets/" + $_) }
+          if (-not $found) { throw "Sube el logo a EduFirma/Assets antes de publicar el Release" }
+          foreach ($name in $found) { Copy-Item ("EduFirma/Assets/" + $name) ("dist/Assets/" + $name) -Force }
+          Compress-Archive -Path dist/* -DestinationPath EduVirtualFirmas-Windows-x64.zip -Force
       - name: Crear checksum SHA256
         shell: pwsh
         run: |
@@ -31,6 +40,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view v0.5.0 *> $null
-          if ($LASTEXITCODE -eq 0) { Write-Error "Ya existe v0.5.0. No se sobreescribe."; exit 1 }
-          gh release create v0.5.0 "dist/EduFirma.exe" "dist/EduFirma.exe.sha256" --title "EduFirma v0.5.0 (vista previa)" --notes "Versión experimental Windows x64: visor PDF integrado con selección de página y posición del sello mediante clic; firma PDF con P12. Verificar externamente las firmas. Sin firma Authenticode." --target "${{ github.sha }}" --latest
+          gh release view v0.6.3 *> $null
+          if ($LASTEXITCODE -eq 0) { Write-Error "Ya existe v0.6.3. No se sobreescribe."; exit 1 }
+          gh release create v0.6.3 "EduVirtualFirmas-Windows-x64.zip" "dist/EduFirma.exe.sha256" --title "EduVirtual Firmas v0.6.3 (vista previa)" --notes "Versión experimental Windows x64: visor PDF integrado con selección de página y posición del sello mediante clic; firma PDF con P12. Verificar externamente las firmas. Sin firma Authenticode." --target "${{ github.sha }}" --latest
