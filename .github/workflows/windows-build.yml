@@ -24,6 +24,21 @@ jobs:
       - name: Publicar EXE autonomo
         shell: pwsh
         run: dotnet publish EduFirma/EduFirma.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o dist
+      - name: Incluir logo junto al EXE
+        shell: pwsh
+        run: |
+          $assets = "EduFirma/Assets"
+          New-Item -ItemType Directory -Force -Path "dist/Assets" | Out-Null
+          $preferred = @("MarcaEduVirtual.png", "LogoEduVirtual.png", "MarcaEduVirtual.jpg")
+          $found = $preferred | Where-Object { Test-Path (Join-Path $assets $_) }
+          if (-not $found) {
+            Write-Error "Falta el logo en EduFirma/Assets. Subir MarcaEduVirtual.png al repositorio."
+            exit 1
+          }
+          foreach ($name in $found) {
+            Copy-Item (Join-Path $assets $name) (Join-Path "dist/Assets" $name) -Force
+          }
+          Write-Host "Logos incluidos: $($found -join ', ')"
       - name: Subir ejecutable
         uses: actions/upload-artifact@v4
         with:
