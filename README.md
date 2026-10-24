@@ -1,25 +1,32 @@
-# EduFirma v0.4.0 — experimental
+# EduVirtual Firmas v0.6.4 (experimental)
 
-Aplicación Windows Forms en C# / .NET 8 para firma local de archivos PDF.
+Aplicación de escritorio en C# / .NET 8 para Windows x64. Código abierto bajo licencia MIT.
 
-## Funciones
-- Seleccionar varios PDF, arrastrar archivos y consultar el certificado PKCS#12.
-- **Firma CMS/SHA-256 experimental de PDF** mediante PDFsharp 6.2.4 (MIT).
-- Guarda copias con sufijo `_EduFirma.pdf`. Nunca sobreescribe los originales.
-- Botón para buscar nuevas versiones en GitHub Releases (sin actualización automática).
-- Verificación integral de firmas, sello visible editable y previsualización incrustada: **pendientes**.
+## Funciones actuales
+- Selección múltiple de PDF y archivos de certificado PKCS#12 (.p12/.pfx).
+- Firma PDF local con certificado y contraseña, usando PDFsharp 6.2.4; el original no se sobrescribe.
+- Visor PDF integrado: mover el sello con el cursor, fijar la ubicación con un clic y confirmar la firma.
+- Sello personalizado con nombre del titular, fecha, QR informativo generado localmente y logotipo de **EduVirtual Firmas**.
+- El código QR no requiere una página web y no constituye por sí solo una verificación criptográfica.
+- Inspección local del certificado y botón de consulta de nuevas versiones publicadas en GitHub Releases.
 
-### Advertencias importantes
-**No utilices todavía EduFirma para documentos legales, universitarios o trámites oficiales.** El motor de firma debe superar compilación y pruebas independientes, incluyendo Adobe Acrobat, múltiples PDFs, y certificados de prueba. Esta versión puede reescribir el PDF y afectar firmas existentes; úsala únicamente en documentos sin firmas previas. No incluye comprobación de revocación OCSP/CRL, timestamp de autoridad TSA ni validación PAdES completa. La autenticidad y aceptación legal no están garantizadas.
+## El logo queda incluido en la descarga
+El archivo del repositorio es `EduFirma/Assets/MarcaEduVirtual.jpg`. GitHub Actions lo copia al artefacto de Windows dentro de `Assets/` y lo puede incrustar en el EXE al compilar.
 
-Nunca subas tu archivo .p12, contraseña o PDFs personales al repositorio ni a GitHub Issues. Firma offline; el botón de actualizaciones sí consulta la API de GitHub.
+Estructura del paquete:
+```
+EduFirma.exe
+Assets/
+  MarcaEduVirtual.jpg
+(otras dependencias)
+```
 
-## Compilar
-GitHub → Actions → **Compilar EduFirma Windows** → ejecución correcta → descargar artefacto `EduFirma-Windows-x64`.
-La compilación produce un ejecutable independiente `EduFirma.exe` para Windows x64. El proyecto utiliza PDFsharp 6.2.4 sujeto a licencia MIT.
+## Descarga y versiones
+- [Releases](https://github.com/PadillaC17/EduFirma/releases): versiones publicadas y descargables.
+- [Actions](https://github.com/PadillaC17/EduFirma/actions): compilaciones de prueba por commit.
+- El botón **Buscar actualizaciones** solo compara la versión instalada con el último Release, no instala automáticamente.
 
-## Plan
-1. Pruebas criptográficas de firmar y verificar con certificados de prueba.
-2. Vista previa PDF y sello visible interactivo.
-3. Verificador integrado completo (integridad, cadena de confianza y revocación opcional).
-4. Actualizador seguro con integridad/verificación de descarga y distribución sin ZIP.
+## Limitaciones de seguridad
+**Versión experimental.** Antes de utilizarla en un trámite oficial se debe validar de forma independiente la integridad criptográfica, la cadena de confianza y el estado de revocación del certificado. EduVirtual Firmas aún no implementa verificación criptográfica integrada completa, TSA confiable ni una actualización automática firmada. No firmar PDF que ya contienen firmas digitales porque PDFsharp puede reescribirlas.
+
+Los PDF y el P12 permanecen en el equipo al firmar. Nunca subir contraseñas, claves privadas, certificados P12 ni documentos personales a GitHub.
