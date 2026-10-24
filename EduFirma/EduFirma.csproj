@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>EduFirma</AssemblyName>
-    <Version>0.6.3</Version>
+    <Version>0.6.4</Version>
     <ApplicationIcon>Assets\EduFirma.ico</ApplicationIcon>
   </PropertyGroup>
   <Target Name="GenerateEduFirmaIcon" BeforeTargets="CoreCompile" Condition="!Exists('Assets\EduFirma.ico')">
@@ -19,5 +19,8 @@
   </ItemGroup>
   <ItemGroup Condition="Exists('Assets/MarcaEduVirtual.png')">
     <EmbeddedResource Include="Assets/MarcaEduVirtual.png" LogicalName="EduFirma.Assets.MarcaEduVirtual.png" />
+  </ItemGroup>
+  <ItemGroup Condition="Exists('Assets/MarcaEduVirtual.jpg')">
+    <EmbeddedResource Include="Assets/MarcaEduVirtual.jpg" LogicalName="EduFirma.Assets.MarcaEduVirtual.jpg" />
   </ItemGroup>
 </Project>
