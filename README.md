@@ -1,32 +1,31 @@
-# EduVirtual Firmas v0.6.4 (experimental)
+# EduVirtual Firmas v0.6.6 — SEGURIDAD: multifirma todavía NO soportada
 
-Aplicación de escritorio en C# / .NET 8 para Windows x64. Código abierto bajo licencia MIT.
+Esta versión mantiene el motor PDFsharp y **bloquea de forma preventiva** documentos donde detecta estructuras habituales de firmas previas. El control es heurístico y no puede garantizar detección de todos los documentos firmados. **No utilizar para añadir una segunda firma.** FirmaEC sigue siendo la opción recomendada para firmar PDFs previamente firmados.
+
+## Por qué se requiere cambiar el motor
+
+PDFsharp 6.2 vuelve a escribir el archivo completo. La firma adicional debe añadirse mediante **actualización incremental del PDF**, conservando sin modificación todos los bytes originales. El motor futuro también debe verificar cada firma antes y después, conservar los campos de firma, respetar permisos DocMDP y rechazar entregas cuando no se pueda demostrar que todas siguen válidas.
+
+## Motor candidato y licencia
+
+iText Core (.NET) permite guardar en modo `UseAppendMode()`, pero se distribuye bajo licencia **AGPLv3 o comercial**, que no equivale a la licencia MIT actual. **No se ha integrado iText en v0.6.6**. Su adopción requeriría revisar y cumplir las condiciones de licencia. Hasta completar las pruebas automáticas con PDFs firmados por FirmaEC y otros lectores, no se anunciará soporte de multifirma.
 
 ## Funciones actuales
-- Selección múltiple de PDF y archivos de certificado PKCS#12 (.p12/.pfx).
-- Firma PDF local con certificado y contraseña, usando PDFsharp 6.2.4; el original no se sobrescribe.
-- Visor PDF integrado: mover el sello con el cursor, fijar la ubicación con un clic y confirmar la firma.
-- Sello personalizado con nombre del titular, fecha, QR informativo generado localmente y logotipo de **EduVirtual Firmas**.
-- El código QR no requiere una página web y no constituye por sí solo una verificación criptográfica.
-- Inspección local del certificado y botón de consulta de nuevas versiones publicadas en GitHub Releases.
 
-## El logo queda incluido en la descarga
-El archivo del repositorio es `EduFirma/Assets/MarcaEduVirtual.jpg`. GitHub Actions lo copia al artefacto de Windows dentro de `Assets/` y lo puede incrustar en el EXE al compilar.
+- Firma inicial con P12 para documentos sin firmas anteriores.
+- Visor PDF y posicionamiento con mouse.
+- Apariencia compacta con código QR informativo, nombre y logo EduVirtual incrustado.
+- Conserva el PDF original generando otro con sufijo.
+- Búsqueda manual de nuevas versiones de GitHub.
 
-Estructura del paquete:
-```
-EduFirma.exe
-Assets/
-  MarcaEduVirtual.jpg
-(otras dependencias)
-```
+## Pruebas obligatorias antes de multifirma
 
-## Descarga y versiones
-- [Releases](https://github.com/PadillaC17/EduFirma/releases): versiones publicadas y descargables.
-- [Actions](https://github.com/PadillaC17/EduFirma/actions): compilaciones de prueba por commit.
-- El botón **Buscar actualizaciones** solo compara la versión instalada con el último Release, no instala automáticamente.
+1. PDF sin firma: agregar firma y verificar integridad.
+2. PDF con una firma válida: comprobarla, añadir la segunda incrementalmente y validar **ambas**.
+3. PDF con dos firmas: agregar una tercera y validar las tres.
+4. PDF con cambios prohibidos por DocMDP: **rechazar** firma.
+5. PDF con firmas inválidas o ambiguas: **rechazar** operación.
+6. Fallo de I/O: eliminar salida parcial, preservar PDF original.
+7. Comprobar aceptación en FirmaEC y al menos otro verificador independiente.
 
-## Limitaciones de seguridad
-**Versión experimental.** Antes de utilizarla en un trámite oficial se debe validar de forma independiente la integridad criptográfica, la cadena de confianza y el estado de revocación del certificado. EduVirtual Firmas aún no implementa verificación criptográfica integrada completa, TSA confiable ni una actualización automática firmada. No firmar PDF que ya contienen firmas digitales porque PDFsharp puede reescribirlas.
-
-Los PDF y el P12 permanecen en el equipo al firmar. Nunca subir contraseñas, claves privadas, certificados P12 ni documentos personales a GitHub.
+No subas a GitHub P12, contraseñas ni PDFs personales.
