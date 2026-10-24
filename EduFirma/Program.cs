@@ -20,7 +20,7 @@ internal static class Program
 
 public sealed class MainForm : Form
 {
-    private const string Version = "0.6.2";
+    private const string Version = "0.6.3";
     private const string Repo = "PadillaC17/EduFirma";
     private readonly ListBox files = new() { Dock = DockStyle.Fill, SelectionMode = SelectionMode.MultiExtended, AllowDrop = true };
     private readonly TextBox p12Path = new() { ReadOnly = true, Dock = DockStyle.Fill };
