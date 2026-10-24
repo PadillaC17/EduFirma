@@ -1,0 +1,17 @@
+name: Probar motor multifirma incremental
+on:
+  push:
+    branches: [feature/multifirma-incremental]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Prueba de dos firmas en revisiones incrementales
+        run: dotnet run --project experiments/MultifirmaSpike/MultifirmaSpike.csproj -c Release
