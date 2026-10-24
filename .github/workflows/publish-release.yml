@@ -1,4 +1,4 @@
-name: Publicar EduVirtual Firmas v0.6.5
+name: Publicar EduVirtual Firmas v0.6.6
 
 on:
   workflow_dispatch:
@@ -35,6 +35,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view v0.6.5 *> $null
-          if ($LASTEXITCODE -eq 0) { Write-Error "Ya existe v0.6.5. No se sobreescribe."; exit 1 }
-          gh release create v0.6.5 "EduVirtualFirmas-Windows-x64.zip" "dist/EduFirma.exe.sha256" --title "EduVirtual Firmas v0.6.5 (experimental)" --notes "Versión experimental Windows x64: visor PDF integrado con selección de página y posición del sello mediante clic; firma PDF con P12. Verificar externamente las firmas. Sin firma Authenticode." --target "${{ github.sha }}" --latest
+          gh release view v0.6.6 *> $null
+          if ($LASTEXITCODE -eq 0) { Write-Error "Ya existe v0.6.6. No se sobreescribe."; exit 1 }
+          gh release create v0.6.6 "EduVirtualFirmas-Windows-x64.zip" "dist/EduFirma.exe.sha256" --title "EduVirtual Firmas v0.6.6 (experimental)" --notes "Versión experimental, no admite firmas múltiples; bloquea PDF previamente firmados.  Windows x64: visor PDF integrado con selección de página y posición del sello mediante clic; firma PDF con P12. Verificar externamente las firmas. Sin firma Authenticode." --target "${{ github.sha }}" --latest
