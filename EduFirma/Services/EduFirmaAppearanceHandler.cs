@@ -13,7 +13,7 @@ public sealed class EduFirmaAppearanceHandler : IAnnotationAppearanceHandler
     private readonly string signer;
     private readonly string signedAt;
     private readonly string qrText;
-    private static readonly string LogoResource = "EduFirma.Assets.MarcaEduVirtual.jpg";
+    private static readonly string LogoResource = "EduFirma.Assets.MarcaEduVirtual.png";
 
     public EduFirmaAppearanceHandler(X509Certificate2 certificate, DateTimeOffset time)
     {
@@ -70,10 +70,24 @@ public sealed class EduFirmaAppearanceHandler : IAnnotationAppearanceHandler
 
         gfx.DrawLine(new XPen(navy, 0.7), 153, 6, 153, 53);
         // Incorporar exactamente la imagen del usuario como recurso del ensamblado.
-        using var stream = typeof(EduFirmaAppearanceHandler).Assembly.GetManifestResourceStream(LogoResource);
-        if (stream == null)
-            throw new InvalidOperationException("Falta Assets/MarcaEduVirtual.jpg en el proyecto. No se reemplazará por otro logo.");
-        using var logo = XImage.FromStream(stream);
-        gfx.DrawImage(logo, 159, 5, 66, 51);
+        var names = new[] { "MarcaEduVirtual.png", "LogoEduVirtual.png", "MarcaEduVirtual.jpg" };
+        using var embedded = typeof(EduFirmaAppearanceHandler).Assembly.GetManifestResourceStream(LogoResource);
+        string? external = names.Select(n => Path.Combine(AppContext.BaseDirectory, "Assets", n)).FirstOrDefault(File.Exists);
+        if (embedded == null && external == null)
+            throw new InvalidOperationException("Falta el logo. Coloca MarcaEduVirtual.png en la carpeta Assets que está junto a EduFirma.exe y vuelve a abrir la aplicación.");
+        using var source = embedded ?? File.OpenRead(external!);
+        // Conversión a JPEG en memoria: PDFsharp reconoce esta imagen sin depender del formato PNG.
+        using var bitmap = new System.Drawing.Bitmap(source);
+        using var converted = new System.Drawing.Bitmap(bitmap.Width, bitmap.Height);
+        using (var canvas = System.Drawing.Graphics.FromImage(converted))
+        {
+            canvas.Clear(System.Drawing.Color.White);
+            canvas.DrawImage(bitmap, 0, 0, bitmap.Width, bitmap.Height);
+        }
+        using var encoded = new MemoryStream();
+        converted.Save(encoded, System.Drawing.Imaging.ImageFormat.Jpeg);
+        encoded.Position = 0;
+        using var logo = XImage.FromStream(encoded);
+        gfx.DrawImage(logo, 159, 3, 66, 54);
     }
 }
